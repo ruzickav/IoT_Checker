@@ -46,17 +46,15 @@ devices:
     ip: "192.168.1.100"
 ```
 
-Options:
+### Options:
 mqtt_user: Your MQTT broker username.
-
 mqtt_password: Your MQTT broker password.
-
 devices: A list of devices to monitor. Each entry needs a name and an ip.
 
-📊 Dashboard Visualization
+## 📊 Dashboard Visualization
 I recommend using the Auto-entities card from HACS to automatically display offline devices:
 
-YAML
+```YAML
 
 type: custom:auto-entities
 card:
@@ -69,7 +67,9 @@ filter:
 sort:
   method: state
   reverse: true
-🛠️ Requirements
+```
+
+## 🛠️ Requirements
 An active MQTT Broker (like Mosquitto Add-on).
 
 Home Assistant MQTT Integration configured.
