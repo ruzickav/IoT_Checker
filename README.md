@@ -1,1 +1,1 @@
-My siple addons for Hom Assistant
+My siple addon for Home Assistant
