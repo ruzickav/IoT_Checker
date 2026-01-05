@@ -18,7 +18,7 @@ def slugify(text):
     text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode('utf-8')
     return text.replace(" ", "_").replace("-", "_").lower()
 
-log("--- SPUSTENI IOT CHECKERU v1.4.1 ---")
+log("--- STARTING IOT CHECKER ---")
 
 # 1. NAČTENÍ KONFIGURACE
 options_path = "/data/options.json"
@@ -31,16 +31,16 @@ try:
     mqtt_pass = config.get("mqtt_password")
     devices = config.get("devices", [])
     
-    log(f"Konfigurace nactena. Uzivatel: {mqtt_user}")
-    log(f"Pocet sledovanych zarizeni: {len(devices)}")
+    log(f"Config read. User: {mqtt_user}")
+    log(f"Number of checked devices: {len(devices)}")
 except Exception as e:
-    log(f"CRITICAL: Chyba pri cteni konfigurace: {e}")
+    log(f"CRITICAL: Config read error: {e}")
     sys.exit(1)
 
 # 2. DEFINICE MQTT CALLBACKŮ
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
-        log("SUCCESS: Pripojeno k MQTT brokeru. Registruji Discovery...")
+        log("SUCCESS: Connected to MQTT Broker. Registring Discovery...")
         for device in devices:
             name = device.get('name')
             if not name: continue
@@ -64,9 +64,9 @@ def on_connect(client, userdata, flags, rc, properties=None):
                 }
             }
             client.publish(discovery_topic, json.dumps(payload), retain=True)
-            log(f"Senzor '{name}' zaregistrovan.")
+            log(f"Sensor '{name}' registered.")
     else:
-        log(f"ERROR: MQTT chyba pripojeni, kod: {rc}")
+        log(f"ERROR: MQTT connection error, code: {rc}")
 
 # 3. NASTAVENÍ MQTT KLIENTA
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -74,19 +74,19 @@ client.on_connect = on_connect
 
 if mqtt_user and mqtt_pass:
     client.username_pw_set(mqtt_user, mqtt_pass)
-    log("MQTT prihlasovaci udaje nastaveny.")
+    log("MQTT connection string registered.")
 else:
-    log("VAROVANI: MQTT udaje v konfiguraci jsou prazdne!")
+    log("VAROVANI: MQTT username and password are empty!")
 
 try:
     client.connect("core-mosquitto", 1883, 60)
 except Exception as e:
-    log(f"CRITICAL: MQTT broker (core-mosquitto) nedostupny: {e}")
+    log(f"CRITICAL: MQTT broker (core-mosquitto) inacessible: {e}")
 
 client.loop_start()
 
 # 4. HLAVNÍ SMYČKA MĚŘENÍ (PING)
-log("Zacinam merit dostupnost...")
+log("Start checking...")
 
 last_states = {}  # Slovník pro uchování předchozího stavu
 
@@ -107,7 +107,7 @@ while True:
         
         # Logujeme POUZE pokud se stav změnil
         if name not in last_states or last_states[name] != current_status:
-            log(f"ZMENA: {name} ({ip}) je nyni {current_status}")
+            log(f"CHANGE: {name} ({ip}) is now {current_status}")
             last_states[name] = current_status
         
         # MQTT posíláme vždy
