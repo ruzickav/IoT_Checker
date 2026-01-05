@@ -1,6 +1,5 @@
 name: "IoT Network Checker"
 description: "Checking network devices by IP address"
-version: "1.3.3"
 slug: "iot_checker"
 arch:
   - aarch64
