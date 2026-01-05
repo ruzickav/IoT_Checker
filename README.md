@@ -47,9 +47,9 @@ devices:
 ```
 
 ### Options:
-mqtt_user: Your MQTT broker username.
-mqtt_password: Your MQTT broker password.
-devices: A list of devices to monitor. Each entry needs a name and an ip.
+- **mqtt_user**: Your MQTT broker username.
+- **mqtt_password**: Your MQTT broker password.
+- **devices**: A list of devices to monitor. Each entry needs a name and an ip.
 
 ## 📊 Dashboard Visualization
 I recommend using the Auto-entities card from HACS to automatically display offline devices:
@@ -74,4 +74,6 @@ An active MQTT Broker (like Mosquitto Add-on).
 
 Home Assistant MQTT Integration configured.
 
-Created by Vladimir
+
+
+###Created by Vladimir
