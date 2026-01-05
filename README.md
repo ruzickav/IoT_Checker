@@ -9,10 +9,11 @@ Welcome to my Home Assistant add-on repository! This add-on allows you to monito
 A lightweight tool that pings your network devices and reports their status (online/offline) directly to Home Assistant via MQTT.
 
 ### Features
-- **Auto-Discovery**: Automatically creates binary sensors in Home Assistant.
+- **Auto-Discovery**: Automatically creates binary sensors in Home Assistant. Named like "binary_sensor.iot_network_checker_iot_mynamefromconfig". Friendly name "IoT MyNameFromConfig"
 - **Connectivity Class**: Uses native Home Assistant device classes for beautiful icons and state colors.
 - **Fast & Lightweight**: Efficiently handles dozens of devices in a single loop.
 - **Customizable**: Easy configuration via a simple list of names and IP addresses.
+- pinging all devices once per 60s
 
 ---
 
