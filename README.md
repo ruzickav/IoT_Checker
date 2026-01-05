@@ -1,9 +1,5 @@
 My siple addon for Home Assistant
 
-soubor s názvem README.md a vložte do něj tento obsah:
-
-Markdown
-
 # IoT Network Checker Add-on Repository
 
 Welcome to my Home Assistant add-on repository! This add-on allows you to monitor the availability of various devices in your local network using ICMP ping.
