@@ -85,25 +85,23 @@ client.loop_start()
 # 4. HLAVNÍ SMYČKA MĚŘENÍ (PING)
 log("Zacinam merit dostupnost...")
 
+last_states = {}  # Slovník pro uchování předchozího stavu
+
 while True:
-    for device in devices:
-        ip = device.get('ip')
-        name = device.get('name')
+    for name, ip in devices.items():
+        if not ip: continue
+        safe_name = slugify(name)
         
-        if not ip or not name:
-            continue
-            
-        safe_name = name.replace(" ", "_").lower()
+        # Ping
+        res = subprocess.run(['ping', '-c', '1', '-W', '1', str(ip)], stdout=subprocess.DEVNULL)
+        current_status = "online" if res.returncode == 0 else "offline"
         
-        # Provedení pingu (1 pokus, timeout 1 sekunda)
-        res = subprocess.run(['ping', '-c', '1', '-W', '1', ip], stdout=subprocess.DEVNULL)
-        status = "online" if res.returncode == 0 else "offline"
+        # Logujeme POUZE pokud se stav změnil oproti minulé kontrole
+        if name not in last_states or last_states[name] != current_status:
+            log(f"ZMENA: {name} ({ip}) je nyni {current_status}")
+            last_states[name] = current_status
         
-        # Odeslání stavu do MQTT tématu pro konkrétní zařízení
-        state_topic = f"iot_checker/{safe_name}/state"
-        client.publish(state_topic, status, retain=True)
+        # MQTT posíláme vždy (pro jistotu, aby HA věděl aktuální stav)
+        client.publish(f"iot_checker/{safe_name}/state", current_status, retain=True)
         
-        log(f"Ping: {name} ({ip}) -> {status}")
-        
-    # Počkáme 60 sekund před dalším kolem měření
     time.sleep(60)
