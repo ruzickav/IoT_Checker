@@ -59,7 +59,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
                 "device": {
                     "identifiers": ["iot_checker_addon"],
                     "name": "IoT Network Checker",
-                    "manufacturer": "Moje HA Dilna",
+                    "manufacturer": "ruzickav",
                     "model": "Python Ping Checker"
                 }
             }
