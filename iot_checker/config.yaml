@@ -14,7 +14,7 @@ options:
   mqtt_user: "MQTT Name"
   mqtt_password: "MQTT Password"
   devices:
-    - name: "Router"
+    - name: "Example Router"
       ip: "192.168.2.1"
 schema:
   mqtt_user: str
