@@ -5,6 +5,7 @@ import time
 import subprocess
 import paho.mqtt.client as mqtt
 import sys
+import unicodedata
 from datetime import datetime
 
 # Pomocná funkce pro logování s datem a časem
@@ -12,7 +13,12 @@ def log(message):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{now}] {message}", flush=True)
 
-log("--- SPUSTENI IOT CHECKERU ---")
+# Funkce pro bezpečné názvy témat (slug)
+def slugify(text):
+    text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode('utf-8')
+    return text.replace(" ", "_").replace("-", "_").lower()
+
+log("--- SPUSTENI IOT CHECKERU v1.4.1 ---")
 
 # 1. NAČTENÍ KONFIGURACE
 options_path = "/data/options.json"
@@ -37,7 +43,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
         log("SUCCESS: Pripojeno k MQTT brokeru. Registruji Discovery...")
         for device in devices:
             name = device.get('name')
-            safe_name = name.replace(" ", "_").lower()
+            if not name: continue
+            safe_name = slugify(name)
             
             # Téma pro automatické nalezení v Home Assistantovi
             discovery_topic = f"homeassistant/binary_sensor/iot_checker/{safe_name}/config"
@@ -59,14 +66,12 @@ def on_connect(client, userdata, flags, rc, properties=None):
             client.publish(discovery_topic, json.dumps(payload), retain=True)
             log(f"Senzor '{name}' zaregistrovan.")
     else:
-        # Kód 5 znamená, že jméno nebo heslo nesouhlasí
-        log(f"ERROR: MQTT chyba pripojeni, kod: {rc} (5 = neautorizovano)")
+        log(f"ERROR: MQTT chyba pripojeni, kod: {rc}")
 
 # 3. NASTAVENÍ MQTT KLIENTA
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_connect = on_connect
 
-# Použití údajů zadaných v kartě Nastavení u doplňku
 if mqtt_user and mqtt_pass:
     client.username_pw_set(mqtt_user, mqtt_pass)
     log("MQTT prihlasovaci udaje nastaveny.")
@@ -74,12 +79,10 @@ else:
     log("VAROVANI: MQTT udaje v konfiguraci jsou prazdne!")
 
 try:
-    # Připojení na vnitřní síť Home Assistanta
     client.connect("core-mosquitto", 1883, 60)
 except Exception as e:
     log(f"CRITICAL: MQTT broker (core-mosquitto) nedostupny: {e}")
 
-# Spuštění MQTT procesů na pozadí
 client.loop_start()
 
 # 4. HLAVNÍ SMYČKA MĚŘENÍ (PING)
@@ -88,20 +91,26 @@ log("Zacinam merit dostupnost...")
 last_states = {}  # Slovník pro uchování předchozího stavu
 
 while True:
-    for name, ip in devices.items():
-        if not ip: continue
+    # Oprava: Procházíme seznam 'devices' přímo, ne přes .items()
+    for device in devices:
+        name = device.get('name')
+        ip = device.get('ip')
+        
+        if not name or not ip: 
+            continue
+            
         safe_name = slugify(name)
         
         # Ping
         res = subprocess.run(['ping', '-c', '1', '-W', '1', str(ip)], stdout=subprocess.DEVNULL)
         current_status = "online" if res.returncode == 0 else "offline"
         
-        # Logujeme POUZE pokud se stav změnil oproti minulé kontrole
+        # Logujeme POUZE pokud se stav změnil
         if name not in last_states or last_states[name] != current_status:
             log(f"ZMENA: {name} ({ip}) je nyni {current_status}")
             last_states[name] = current_status
         
-        # MQTT posíláme vždy (pro jistotu, aby HA věděl aktuální stav)
+        # MQTT posíláme vždy
         client.publish(f"iot_checker/{safe_name}/state", current_status, retain=True)
         
     time.sleep(60)
