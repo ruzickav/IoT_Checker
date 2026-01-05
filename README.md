@@ -44,6 +44,8 @@ devices:
     ip: "192.168.1.50"
   - name: "NAS Storage"
     ip: "192.168.1.100"
+```
+
 Options:
 mqtt_user: Your MQTT broker username.
 
