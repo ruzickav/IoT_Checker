@@ -1,4 +1,4 @@
-My siple addon for Home Assistant
+My simple addon for Home Assistant
 
 # IoT Network Checker Add-on Repository
 
