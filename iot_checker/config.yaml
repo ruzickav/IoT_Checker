@@ -1,6 +1,6 @@
 name: "IoT Network Checker"
 description: "Checking / monitoring network devices by Ping"
-version: "1.3.6"
+version: "1.3.7"
 slug: "iot_checker"
 init: false
 arch:
