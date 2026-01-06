@@ -102,7 +102,7 @@ while True:
         safe_name = slugify(name)
         
         # Ping
-        res = subprocess.run(['ping', '-c', '3', '-W', '3', str(ip)], stdout=subprocess.DEVNULL)
+        res = subprocess.run(['ping', '-c', '3', str(ip)], stdout=subprocess.DEVNULL)
         current_status = "online" if res.returncode == 0 else "offline"
         
         # Logujeme POUZE pokud se stav změnil
