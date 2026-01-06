@@ -19,7 +19,7 @@ def slugify(text):
     text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode('utf-8')
     return text.replace(" ", "_").replace("-", "_").lower()
 
-log("--- STARTING PARALLEL IOT CHECKER v1.5.1 ---")
+log("--- STARTING PARALLEL IOT CHECKER v1.5.2 ---")
 
 # 1. LOAD CONFIGURATION
 options_path = "/data/options.json"
@@ -80,12 +80,10 @@ def check_device(device):
     return {"name": name, "ip": ip, "status": status}
 
 # 4. MAIN LOOP
-log("Device monitoring started...")
+log("Device monitoring started. Only state changes will be logged.")
 last_states = {}
 
 while True:
-    start_time = time.time()
-    
     # Execute pings in parallel
     with ThreadPoolExecutor(max_workers=50) as executor:
         results = list(executor.map(check_device, devices_list))
@@ -106,7 +104,5 @@ while True:
         # Always publish state to MQTT
         client.publish(f"iot_checker/{safe_name}/state", status, retain=True)
 
-    duration = time.time() - start_time
-    log(f"Scan cycle completed in {duration:.2f} seconds. Sleeping for 60s...")
-    
+    # Tichý odpočinek po dobu 60 sekund
     time.sleep(60)
